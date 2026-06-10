@@ -717,13 +717,8 @@
         repairNote:    document.getElementById('repairNote').value.trim()
       };
 
-      // GAS ต้องการ POST แบบ no-cors
-      const formData = new FormData();
-      formData.append('payload', JSON.stringify(payload));
-
-      const res  = await fetch(GAS_URL, { method: 'POST', body: formData });
+      const res  = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
       const text = await res.text();
-      alert('Response: ' + text);
       const data = JSON.parse(text);
 
       if (data.success) {
