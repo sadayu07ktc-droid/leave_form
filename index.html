@@ -720,7 +720,7 @@
 
       const res  = await fetch(GAS_URL, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' }, // ✅ เปลี่ยนจาก application/json
         body:    JSON.stringify(payload)
       });
       const data = await res.json();
