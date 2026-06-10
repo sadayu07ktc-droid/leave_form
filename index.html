@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ใบลา / แจ้งซ่อม — SSB Smart Supply</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --green-dark:   #2D5A27;
+      --green-main:   #4A7C3F;
+      --green-light:  #D6E8D0;
+      --green-pale:   #F0F7EE;
+      --brown-main:   #7B4F2E;
+      --brown-light:  #F5E6D0;
+      --grey-text:    #333333;
+      --grey-sub:     #666666;
+      --grey-border:  #DDDDDD;
+      --white:        #FFFFFF;
+      --red:          #DC2626;
+      --shadow:       0 2px 12px rgba(0,0,0,0.10);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: var(--green-pale);
+      color: var(--grey-text);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--green-dark);
+      padding: 18px 20px 14px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-logo {
+      font-size: 11px;
+      color: var(--green-light);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .header-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    /* ── Container ── */
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* ── Driver Info Card ── */
+    .driver-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .driver-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--green-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .driver-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--grey-text);
+    }
+    .driver-plate {
+      font-size: 12px;
+      color: var(--grey-sub);
+      margin-top: 2px;
+    }
+
+    /* ── Step Indicator ── */
+    .steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 24px;
+    }
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .step-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--grey-border);
+      color: var(--grey-sub);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    .step-dot.active {
+      background: var(--green-main);
+      color: var(--white);
+    }
+    .step-dot.done {
+      background: var(--green-dark);
+      color: var(--white);
+    }
+    .step-label {
+      font-size: 10px;
+      color: var(--grey-sub);
+      white-space: nowrap;
+    }
+    .step-label.active { color: var(--green-main); font-weight: 600; }
+    .step-line {
+      width: 40px;
+      height: 2px;
+      background: var(--grey-border);
+      margin-bottom: 18px;
+      transition: background 0.3s;
+    }
+    .step-line.done { background: var(--green-dark); }
+
+    /* ── Section Title ── */
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--green-dark);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    /* ── Type Select Cards ── */
+    .type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .type-card {
+      background: var(--white);
+      border: 2px solid var(--grey-border);
+      border-radius: 14px;
+      padding: 20px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: var(--shadow);
+    }
+    .type-card:active { transform: scale(0.97); }
+    .type-card.selected {
+      border-color: var(--green-main);
+      background: var(--green-pale);
+    }
+    .type-card.selected.repair {
+      border-color: var(--brown-main);
+      background: var(--brown-light);
+    }
+    .type-icon { font-size: 36px; margin-bottom: 8px; }
+    .type-label {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--grey-text);
+    }
+    .type-desc {
+      font-size: 11px;
+      color: var(--grey-sub);
+      margin-top: 4px;
+    }
+
+    /* ── Form Card ── */
+    .form-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+    .form-card.repair-card {
+      border-top: 4px solid var(--brown-main);
+    }
+    .form-card.leave-card {
+      border-top: 4px solid var(--green-main);
+    }
+
+    /* ── Form Fields ── */
+    .field { margin-bottom: 16px; }
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--grey-text);
+      margin-bottom: 6px;
+    }
+    label .required {
+      color: var(--red);
+      margin-left: 2px;
+    }
+
+    input[type="date"],
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--grey-border);
+      border-radius: 10px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 15px;
+      color: var(--grey-text);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--green-main);
+    }
+    .repair-card input:focus,
+    .repair-card select:focus,
+    .repair-card textarea:focus {
+      border-color: var(--brown-main);
+    }
+    textarea {
+      resize: none;
+      height: 90px;
+      line-height: 1.6;
+    }
+
+    /* ── Leave Days Badge ── */
+    .leave-days-badge {
+      display: inline-block;
+      background: var(--green-light);
+      color: var(--green-dark);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 20px;
+      margin-top: -8px;
+    }
+
+    /* ── Leave Type Pills ── */
+    .leave-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .leave-pill {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1.5px solid var(--grey-border);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--white);
+      color: var(--grey-text);
+    }
+    .leave-pill.selected {
+      background: var(--green-main);
+      border-color: var(--green-main);
+      color: var(--white);
+    }
+
+    /* ── Buttons ── */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-back {
+      background: var(--grey-border);
+      color: var(--grey-sub);
+      flex: 0 0 80px;
+    }
+    .btn-submit {
+      background: var(--green-main);
+      color: var(--white);
+    }
+    .btn-submit.repair { background: var(--brown-main); }
+    .btn-submit:disabled {
+      background: var(--grey-border);
+      color: var(--grey-sub);
+      cursor: not-allowed;
+    }
+
+    /* ── Success Screen ── */
+    .success-screen {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .success-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      animation: pop 0.4s ease;
+    }
+    @keyframes pop {
+      0%   { transform: scale(0.5); opacity: 0; }
+      80%  { transform: scale(1.1); }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+    .success-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--green-dark);
+      margin-bottom: 8px;
+    }
+    .success-sub {
+      font-size: 14px;
+      color: var(--grey-sub);
+      line-height: 1.6;
+    }
+    .success-ref {
+      margin-top: 20px;
+      background: var(--green-light);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--green-dark);
+      font-weight: 600;
+    }
+
+    /* ── Loading ── */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      gap: 12px;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--green-light);
+      border-top-color: var(--green-main);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 14px; color: var(--grey-sub); }
+
+    /* ── Hidden ── */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">กำลังโหลด...</div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-logo">SSB Smart Supply</div>
+  <div class="header-title" id="headerTitle">ใบลา / แจ้งซ่อม</div>
+</div>
+
+<div class="container">
+
+  <!-- Driver Info -->
+  <div class="driver-card" id="driverCard">
+    <div class="driver-avatar">🚛</div>
+    <div>
+      <div class="driver-name" id="driverName">กำลังโหลด...</div>
+      <div class="driver-plate" id="driverPlate">—</div>
+    </div>
+  </div>
+
+  <!-- ── STEP 1: เลือกประเภท ── -->
+  <div id="step1">
+    <div class="steps">
+      <div class="step">
+        <div class="step-dot active">1</div>
+        <div class="step-label active">ประเภท</div>
+      </div>
+      <div class="step-line" id="line1"></div>
+      <div class="step">
+        <div class="step-dot" id="dot2">2</div>
+        <div class="step-label" id="label2">รายละเอียด</div>
+      </div>
+      <div class="step-line" id="line2"></div>
+      <div class="step">
+        <div class="step-dot" id="dot3">3</div>
+        <div class="step-label" id="label3">เสร็จสิ้น</div>
+      </div>
+    </div>
+
+    <div class="section-title">เลือกประเภทที่ต้องการแจ้ง</div>
+    <div class="type-grid">
+      <div class="type-card" id="cardLeave" onclick="selectType('leave')">
+        <div class="type-icon">📋</div>
+        <div class="type-label">แจ้งลา</div>
+        <div class="type-desc">ลาป่วย ลากิจ<br>ลาพักร้อน</div>
+      </div>
+      <div class="type-card" id="cardRepair" onclick="selectType('repair')">
+        <div class="type-icon">🔧</div>
+        <div class="type-label">แจ้งซ่อม</div>
+        <div class="type-desc">รถเสีย ซ่อมบำรุง<br>อุปกรณ์ชำรุด</div>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <button class="btn btn-submit" id="btnNext1" onclick="goStep2()" disabled>
+        ถัดไป →
+      </button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2A: ฟอร์มแจ้งลา ── -->
+  <div id="step2Leave" class="hidden">
+    <div class="steps">
+      <div class="step">
+        <div class="step-dot done">✓</div>
+        <div class="step-label">ประเภท</div>
+      </div>
+      <div class="step-line done"></div>
+      <div class="step">
+        <div class="step-dot active">2</div>
+        <div class="step-label active">รายละเอียด</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step">
+        <div class="step-dot">3</div>
+        <div class="step-label">เสร็จสิ้น</div>
+      </div>
+    </div>
+
+    <div class="form-card leave-card">
+      <div class="section-title">📋 รายละเอียดการลา</div>
+
+      <div class="field">
+        <label>ประเภทการลา <span class="required">*</span></label>
+        <div class="leave-pills">
+          <div class="leave-pill" onclick="selectLeaveType('ลาป่วย', this)">🤒 ลาป่วย</div>
+          <div class="leave-pill" onclick="selectLeaveType('ลากิจ', this)">📌 ลากิจ</div>
+          <div class="leave-pill" onclick="selectLeaveType('ลาพักร้อน', this)">🏖️ ลาพักร้อน</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>วันที่เริ่มลา <span class="required">*</span></label>
+        <input type="date" id="leaveDateStart" onchange="onLeaveDateChange()" />
+      </div>
+
+      <div class="field">
+        <label>วันที่สิ้นสุด <span class="required">*</span></label>
+        <input type="date" id="leaveDateEnd" onchange="validateLeaveForm()" />
+      </div>
+
+      <div class="field">
+        <div class="leave-days-badge hidden" id="leaveDaysBadge">
+          📅 ลา <span id="leaveDaysCount">0</span> วัน
+        </div>
+      </div>
+
+      <div class="field">
+        <label>หมายเหตุ</label>
+        <textarea id="leaveNote" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goStep1()">← กลับ</button>
+      <button class="btn btn-submit" id="btnSubmitLeave" onclick="submitForm('leave')" disabled>
+        ส่งใบลา
+      </button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2B: ฟอร์มแจ้งซ่อม ── -->
+  <div id="step2Repair" class="hidden">
+    <div class="steps">
+      <div class="step">
+        <div class="step-dot done">✓</div>
+        <div class="step-label">ประเภท</div>
+      </div>
+      <div class="step-line done"></div>
+      <div class="step">
+        <div class="step-dot active">2</div>
+        <div class="step-label active">รายละเอียด</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step">
+        <div class="step-dot">3</div>
+        <div class="step-label">เสร็จสิ้น</div>
+      </div>
+    </div>
+
+    <div class="form-card repair-card">
+      <div class="section-title">🔧 รายละเอียดการแจ้งซ่อม</div>
+
+      <div class="field">
+        <label>อาการเสีย / ปัญหาที่พบ <span class="required">*</span></label>
+        <textarea id="repairSymptom" placeholder="เช่น ยางแบน เครื่องยนต์ร้อน ไฟไม่ติด..."
+          oninput="validateRepairForm()"></textarea>
+      </div>
+
+      <div class="field">
+        <label>วันที่แจ้งซ่อม <span class="required">*</span></label>
+        <input type="date" id="repairDate" onchange="validateRepairForm()" />
+      </div>
+
+      <div class="field">
+        <label>หมายเหตุ</label>
+        <textarea id="repairNote" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goStep1()">← กลับ</button>
+      <button class="btn btn-submit repair" id="btnSubmitRepair" onclick="submitForm('repair')" disabled>
+        ส่งแจ้งซ่อม
+      </button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: สำเร็จ ── -->
+  <div id="step3" class="hidden">
+    <div class="success-screen">
+      <div class="success-icon" id="successIcon">✅</div>
+      <div class="success-title" id="successTitle">ส่งคำขอแล้ว!</div>
+      <div class="success-sub" id="successSub">
+        ระบบได้รับคำขอของคุณแล้ว<br>กรุณารอ Admin อนุมัติครับ
+      </div>
+      <div class="success-ref" id="successRef">รหัสอ้างอิง: —</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── State ──────────────────────────────────────────────
+  let liffProfile  = null;
+  let selectedType = null;
+  let selectedLeaveType = null;
+  const GAS_URL = 'YOUR_GAS_WEBAPP_URL'; // ← เปลี่ยนตรงนี้
+
+  // ── Init LIFF ─────────────────────────────────────────
+  async function initLiff() {
+    try {
+      await liff.init({ liffId: 'YOUR_LIFF_ID' }); // ← เปลี่ยนตรงนี้
+      if (!liff.isLoggedIn()) { liff.login(); return; }
+
+      liffProfile = await liff.getProfile();
+      document.getElementById('driverName').textContent = liffProfile.displayName;
+
+      // ดึงข้อมูลคนขับจาก GAS
+      const res  = await fetch(`${GAS_URL}?action=getUser&userId=${liffProfile.userId}`);
+      const data = await res.json();
+      if (data.status === 'ok' && data.plate) {
+        document.getElementById('driverPlate').textContent =
+          `🚗 ${data.plate}` + (data.truckType ? `  •  ${data.truckType}` : '');
+      }
+
+      // ตั้งวันที่ default = วันนี้
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('leaveDateStart').value = today;
+      document.getElementById('leaveDateEnd').value   = today;
+      document.getElementById('repairDate').value     = today;
+
+    } catch (err) {
+      console.error('LIFF init error:', err);
+      document.getElementById('driverName').textContent = 'ไม่พบข้อมูล';
+    } finally {
+      document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+  }
+
+  // ── Step Navigation ───────────────────────────────────
+  function selectType(type) {
+    selectedType = type;
+    document.getElementById('cardLeave').classList.toggle('selected',  type === 'leave');
+    document.getElementById('cardRepair').classList.toggle('selected', type === 'repair');
+    document.getElementById('cardRepair').classList.toggle('repair',   type === 'repair');
+    document.getElementById('btnNext1').disabled = false;
+    document.getElementById('btnNext1').style.background =
+      type === 'repair' ? 'var(--brown-main)' : 'var(--green-main)';
+  }
+
+  function goStep2() {
+    document.getElementById('step1').classList.add('hidden');
+    if (selectedType === 'leave') {
+      document.getElementById('step2Leave').classList.remove('hidden');
+      document.getElementById('headerTitle').textContent = '📋 แจ้งลา';
+    } else {
+      document.getElementById('step2Repair').classList.remove('hidden');
+      document.getElementById('headerTitle').textContent = '🔧 แจ้งซ่อม';
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function goStep1() {
+    document.getElementById('step2Leave').classList.add('hidden');
+    document.getElementById('step2Repair').classList.add('hidden');
+    document.getElementById('step1').classList.remove('hidden');
+    document.getElementById('headerTitle').textContent = 'ใบลา / แจ้งซ่อม';
+    window.scrollTo(0, 0);
+  }
+
+  // ── Leave Type Pills ──────────────────────────────────
+  function selectLeaveType(type, el) {
+    selectedLeaveType = type;
+    document.querySelectorAll('.leave-pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    validateLeaveForm();
+  }
+
+  function onLeaveDateChange() {
+    const start = document.getElementById('leaveDateStart').value;
+    // บังคับ end >= start
+    document.getElementById('leaveDateEnd').min = start;
+    if (document.getElementById('leaveDateEnd').value < start) {
+      document.getElementById('leaveDateEnd').value = start;
+    }
+    calcLeaveDays();
+    validateLeaveForm();
+  }
+
+  function calcLeaveDays() {
+    const start = document.getElementById('leaveDateStart').value;
+    const end   = document.getElementById('leaveDateEnd').value;
+    const badge = document.getElementById('leaveDaysBadge');
+    if (start && end) {
+      const diff = Math.round((new Date(end) - new Date(start)) / 86400000) + 1;
+      document.getElementById('leaveDaysCount').textContent = diff;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
+
+  function validateLeaveForm() {
+    calcLeaveDays();
+    const start = document.getElementById('leaveDateStart').value;
+    const end   = document.getElementById('leaveDateEnd').value;
+    const ok    = selectedLeaveType && start && end && end >= start;
+    document.getElementById('btnSubmitLeave').disabled = !ok;
+  }
+
+  function validateRepairForm() {
+    const ok = document.getElementById('repairSymptom').value.trim().length > 3
+            && document.getElementById('repairDate').value;
+    document.getElementById('btnSubmitRepair').disabled = !ok;
+  }
+
+  // ── Submit ────────────────────────────────────────────
+  async function submitForm(type) {
+    const btnId = type === 'leave' ? 'btnSubmitLeave' : 'btnSubmitRepair';
+    document.getElementById(btnId).disabled = true;
+    document.getElementById(btnId).textContent = 'กำลังส่ง...';
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+
+    try {
+      const payload = {
+        action:  'submitLeaveRepair',
+        userId:  liffProfile.userId,
+        name:    liffProfile.displayName,
+        type:    type,
+        // leave
+        leaveType:      selectedLeaveType || '',
+        leaveDateStart: document.getElementById('leaveDateStart').value,
+        leaveDateEnd:   document.getElementById('leaveDateEnd').value,
+        leaveNote:      document.getElementById('leaveNote').value.trim(),
+        // repair
+        repairSymptom: document.getElementById('repairSymptom').value.trim(),
+        repairDate:    document.getElementById('repairDate').value,
+        repairNote:    document.getElementById('repairNote').value.trim()
+      };
+
+      const res  = await fetch(GAS_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        showSuccess(type, data.refId);
+      } else {
+        alert('เกิดข้อผิดพลาด: ' + (data.error || 'กรุณาลองใหม่'));
+        document.getElementById(btnId).disabled = false;
+        document.getElementById(btnId).textContent = type === 'leave' ? 'ส่งใบลา' : 'ส่งแจ้งซ่อม';
+      }
+    } catch (err) {
+      alert('ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่');
+      document.getElementById(btnId).disabled = false;
+    } finally {
+      document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+  }
+
+  function showSuccess(type, refId) {
+    document.getElementById('step2Leave').classList.add('hidden');
+    document.getElementById('step2Repair').classList.add('hidden');
+    document.getElementById('step3').classList.remove('hidden');
+
+    if (type === 'leave') {
+      document.getElementById('successIcon').textContent  = '📋';
+      document.getElementById('successTitle').textContent = 'ส่งใบลาแล้ว!';
+      document.getElementById('successSub').innerHTML =
+        'ระบบได้รับใบลาของคุณแล้ว<br>กรุณารอ Admin อนุมัติครับ';
+      document.getElementById('headerTitle').textContent = '📋 ส่งใบลาแล้ว';
+    } else {
+      document.getElementById('successIcon').textContent  = '🔧';
+      document.getElementById('successTitle').textContent = 'แจ้งซ่อมแล้ว!';
+      document.getElementById('successSub').innerHTML =
+        'ระบบได้รับการแจ้งซ่อมแล้ว<br>กรุณารอ Admin ดำเนินการครับ';
+      document.getElementById('headerTitle').textContent = '🔧 แจ้งซ่อมแล้ว';
+    }
+
+    document.getElementById('successRef').textContent = `รหัสอ้างอิง: ${refId || '—'}`;
+    window.scrollTo(0, 0);
+  }
+
+  // ── Start ─────────────────────────────────────────────
+  initLiff();
+</script>
+</body>
+</html>
