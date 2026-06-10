@@ -590,6 +590,7 @@
       // ดึงข้อมูลคนขับจาก GAS
       const res  = await fetch(`${GAS_URL}?action=getUser&userId=${liffProfile.userId}`);
       const data = await res.json();
+      console.log('GAS response:', JSON.stringify(data)); // ← เพิ่มบรรทัดนี้
       if (data.status === 'ok') {
         // ✅ ใช้ชื่อจาก DATA_DRIVER แทนชื่อ LINE Profile
         document.getElementById('driverName').textContent = data.name || liffProfile.displayName;
