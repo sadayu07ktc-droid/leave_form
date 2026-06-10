@@ -586,14 +586,20 @@
       if (!liff.isLoggedIn()) { liff.login(); return; }
 
       liffProfile = await liff.getProfile();
-      document.getElementById('driverName').textContent = liffProfile.displayName;
 
       // ดึงข้อมูลคนขับจาก GAS
       const res  = await fetch(`${GAS_URL}?action=getUser&userId=${liffProfile.userId}`);
       const data = await res.json();
-      if (data.status === 'ok' && data.plate) {
-        document.getElementById('driverPlate').textContent =
-          `🚗 ${data.plate}` + (data.truckType ? `  •  ${data.truckType}` : '');
+      if (data.status === 'ok') {
+        // ✅ ใช้ชื่อจาก DATA_DRIVER แทนชื่อ LINE Profile
+        document.getElementById('driverName').textContent = data.name || liffProfile.displayName;
+        if (data.plate) {
+          document.getElementById('driverPlate').textContent =
+            `🚗 ${data.plate}` + (data.truckType ? `  •  ${data.truckType}` : '');
+        }
+      } else {
+        // fallback ใช้ชื่อ LINE ถ้าดึงข้อมูลไม่ได้
+        document.getElementById('driverName').textContent = liffProfile.displayName;
       }
 
       // ตั้งวันที่ default = วันนี้
