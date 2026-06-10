@@ -577,12 +577,12 @@
   let liffProfile  = null;
   let selectedType = null;
   let selectedLeaveType = null;
-  const GAS_URL = 'YOUR_GAS_WEBAPP_URL'; // ← เปลี่ยนตรงนี้
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbw4UvKuRrAQ_3Ldm8U0VJqfjfBQUSYaTEdrxkdXUVN98G68XseCquhDeXfMgU8cVYaY/exec'; // ← เปลี่ยนตรงนี้
 
   // ── Init LIFF ─────────────────────────────────────────
   async function initLiff() {
     try {
-      await liff.init({ liffId: 'YOUR_LIFF_ID' }); // ← เปลี่ยนตรงนี้
+      await liff.init({ liffId: '2010274217-GSP0vcDg' }); // ← เปลี่ยนตรงนี้
       if (!liff.isLoggedIn()) { liff.login(); return; }
 
       liffProfile = await liff.getProfile();
